@@ -10,26 +10,27 @@
 </head>
 
 <body>
+    <main id="main-container">
+        <table id="files-container">
 
-    <table id="files-container">
+        </table>
 
-    </table>
+        <form id="add-file-form" action="index.html">
+            <div>
+                <div>
+                    <label>File Name:</label>
+                    <input type="text" id="name-input">
+                </div>
+                <div>
+                    <label>File content:</label>
+                    <textarea type="text" id="content-input"></textarea>
+                </div>
 
-    <form id="add-file-form" action="index.html">
-        <div>
-        <div>
-            <label>File Name:</label>
-            <input type="text" id="name-input">
-        </div>
-        <div>
-            <label>File content:</label>
-            <textarea type="text" id="content-input"></textarea>
-        </div>
-    
-        <input type="submit" onclick="addFile(document.getElementById('name-input').value, document.getElementById('content-input').value)">
-    </div>
-    </form>
-
+                <input type="submit"
+                    onclick="addFile(document.getElementById('name-input').value, document.getElementById('content-input').value)">
+            </div>
+        </form>
+    </main>
     <script src="main.js"></script>
 </body>
 

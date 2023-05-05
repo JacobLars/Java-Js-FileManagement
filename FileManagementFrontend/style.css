@@ -4,6 +4,7 @@
     margin-left: auto;
     margin-right: auto;
     width: 50%;
+    text-align: center;
 }
 
 tr{
@@ -51,4 +52,34 @@ form input[type=submit]:hover{
 
 a{
     margin: 5px;
+    text-decoration: none;
+    border-radius: 5px;
+    color: black;
+}
+
+.download-link{
+    
+    background-color: coral;
+}
+
+.download-link:hover{
+    
+    background-color: rgb(228, 111, 69);
+}
+
+.edit-link{
+    background-color: deepskyblue;
+}
+
+.edit-link:hover{
+    background-color: rgb(5, 170, 225);
+}
+
+.delete-link{
+    background-color: red;
+   
+}
+
+.delete-link:hover{
+    background-color: rgb(211, 9, 9);
 }

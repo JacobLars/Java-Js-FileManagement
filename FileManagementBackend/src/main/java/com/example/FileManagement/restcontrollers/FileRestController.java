@@ -6,14 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Resource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileRestController {
 
     List<String> fileNames;
-    
+
     @CrossOrigin("http://127.0.0.1:5500/")
     @PostMapping("files/add/{fileName}")
     public ResponseEntity<String> createFile(@PathVariable("fileName") String fileName, @RequestBody String content) {
@@ -45,7 +49,7 @@ public class FileRestController {
         }
         return ResponseEntity.ok().body(fileName + ".txt was created successfully!");
     }
-    
+
     @CrossOrigin("http://127.0.0.1:5500/")
     @PostMapping("files/delete/{fileName}")
     public ResponseEntity<String> deleteFile(@PathVariable("fileName") String fileName) {
@@ -53,7 +57,7 @@ public class FileRestController {
         file.delete();
         return ResponseEntity.ok().body(fileName + ".txt was deleted successfully!");
     }
-    
+
     @CrossOrigin("http://127.0.0.1:5500/")
     @GetMapping("files/get")
     public List<String> getAllFiles() {
@@ -64,11 +68,11 @@ public class FileRestController {
         }
         return fileNames;
     }
-    
+
     @CrossOrigin("http://127.0.0.1:5500/")
     @GetMapping("files/get/content/{fileName}")
     public String getFileContent(@PathVariable("fileName") String fileName) {
-        String filePath = "src\\main\\resources\\userFiles\\" + fileName + ".txt";
+        String filePath = "src\\main\\resources\\userFiles\\" + fileName;
         try ( BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -85,17 +89,45 @@ public class FileRestController {
     @CrossOrigin("http://127.0.0.1:5500/")
     @PutMapping("files/edit/{fileName}")
     public ResponseEntity<String> editFile(@PathVariable("fileName") String fileName, @RequestBody String newContent) {
-        File file = new File("src\\main\\resources\\userFiles\\" + fileName + ".txt");
+        //File file = new File("src\\main\\resources\\userFiles\\" + fileName);
+        File folder = new File("src\\main\\resources\\userFiles");
         FileWriter fileWriter;
-        try {
-            fileWriter = new FileWriter(file);
-            fileWriter.write(newContent);
-            fileWriter.close();
-        } catch (IOException ex) {
-            Logger.getLogger(FileRestController.class.getName()).log(Level.SEVERE, null, ex);
+        for (File file : folder.listFiles()) {
+            if (fileName.equals(file.getName())) {
+                try {
+                    System.out.println(newContent);
+                    fileWriter = new FileWriter(file);
+                    fileWriter.write(newContent);
+                    fileWriter.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(FileRestController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
         }
-        
+
         return ResponseEntity.ok().body(fileName + ".txt was edited successfully!");
     }
 
+    @CrossOrigin("http://127.0.0.1:5500/")
+    @GetMapping("files/download/{fileName}")
+    public ResponseEntity<FileSystemResource> downloadFile(@PathVariable("fileName") String fileName) throws IOException {
+
+        File file = new File("src\\main\\resources\\userFiles\\" + fileName);
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        FileSystemResource resource = new FileSystemResource(file);
+        String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+        if (mimeType == null) {
+            mimeType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mimeType))
+                .contentLength(resource.contentLength())
+                .header("Content-Disposition", "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
 }
